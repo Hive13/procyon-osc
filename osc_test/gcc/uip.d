@@ -1,0 +1,36 @@
+gcc/uip.o: \
+ /home/hodapp/Development/StellarisWare/third_party/uip-1.0/uip/uip.c \
+ /home/hodapp/Development/StellarisWare/third_party/uip-1.0/uip/uip.h \
+ /home/hodapp/Development/StellarisWare/third_party/uip-1.0/uip/uipopt.h \
+ uip-conf.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/inttypes.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/include/stdint.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/stdint.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/include/stddef.h \
+ osc_test.h \
+ /home/hodapp/Development/StellarisWare/third_party/uip-1.0/uip/uip_timer.h \
+ /home/hodapp/Development/StellarisWare/third_party/uip-1.0/uip/clock.h \
+ clock-arch.h \
+ /home/hodapp/Development/StellarisWare/third_party/uip-1.0/uip/pt.h \
+ /home/hodapp/Development/StellarisWare/third_party/uip-1.0/uip/lc.h \
+ /home/hodapp/Development/StellarisWare/third_party/uip-1.0/uip/lc-switch.h \
+ dhcpc.h \
+ /home/hodapp/Development/StellarisWare/third_party/uip-1.0/uip/uip_arch.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/string.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/_ansi.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/newlib.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/sys/config.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/machine/ieeefp.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/sys/features.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/sys/reent.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/_ansi.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/sys/_types.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/machine/_types.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/machine/_default_types.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/sys/lock.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/sys/string.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/stdio.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/include/stdarg.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/sys/types.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/machine/types.h \
+ /home/hodapp/CodeSourcery/Sourcery_G++_Lite/bin/../lib/gcc/arm-none-eabi/4.5.2/../../../../arm-none-eabi/include/sys/stdio.h

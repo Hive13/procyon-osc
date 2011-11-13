@@ -1,0 +1,29 @@
+This is for the Procyon board from Teho Labs. This specific project is to
+implement some OSC (Open Sound Control) functionality on the board. Right now,
+it gets an address via DHCP and listens for OSC messages on UDP port 12000.
+
+It is a single part of a larger project to rework the glass block LED matrix
+for Hive13 (see link at the end) to combine the Processing and the Arduino
+halves into a single board.
+
+Note that to build properly, this needs a fair amount of setup, primarily
+installing the proper CodeSourcery toolchain and StellarisWare from TI.
+You will likely need to edit the file 'toolchainsettings' to point to your
+own specific configuration. (If you follow the 'Getting Started' guide for
+the Procyon board and have successfully made the examples run here, the
+changes you made probably are sufficient for this project too.)
+
+Currently it is set up to use the serial UART via an FTDI chip for flashing;
+I have not attempted it with JTAG.
+
+This is based on the Procycon example project called enet_uip.
+
+References:
+* Procyon board: http://teholabs.com/products/procyon.html
+* Procyon examples: http://teholabs.com/docs/procyon:examples
+* Getting Started: http://teholabs.com/docs/procyon:start (See the sections
+for your specific configuration for how to set up the dependencies for the
+Procyon board).
+* Hive13 Glass Block Matrix: https://github.com/Hive13/windowmatrix
+* uIP TCP/IP stack: http://www.sics.se/~adam/old-uip/documentation.html
+* Open Sound Control 1.0: http://opensoundcontrol.org/spec-1_0
