@@ -6,8 +6,6 @@
 
 #define OSC_LISTEN_PORT 12000
 
-void osc_get_address(char * data, int length);
-
 // This structure is a combination of the fields used in the original DHCP
 // structure, and some additional fields for handling OSC data. All the DHCP
 // fields were kept the same so that the DHCP code could remain mostly

@@ -1,25 +1,8 @@
 //*****************************************************************************
-//
-// enet_uip.c - Sample WebServer Application for Ethernet Demo
-//
-// Copyright (c) 2009-2011 Texas Instruments Incorporated.  All rights reserved.
-// Software License Agreement
-// 
-// Texas Instruments (TI) is supplying this software for use solely and
-// exclusively on TI's microcontroller products. The software is owned by
-// TI and/or its suppliers, and is protected under applicable copyright
-// laws. You may not combine this software with "viral" open-source
-// software in order to form a larger program.
-// 
-// THIS SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS.
-// NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT
-// NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. TI SHALL NOT, UNDER ANY
-// CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-// DAMAGES, FOR ANY REASON WHATSOEVER.
-// 
-// This is part of revision 7611 of the EK-LM3S9B90 Firmware Package.
-//
+// osc_test: OSC listener for Procyon board. This currently gets an address
+// via DHCP as well.
+// This is based on the enet_uip example from the Procyon board, which is
+// itself based on some code from the uIP source and StellarisWare from TI.
 //*****************************************************************************
 
 #include "inc/hw_ethernet.h"
@@ -42,6 +25,8 @@
 #include "uip/uip_arp.h"
 //#include "httpd/httpd.h"
 #include "dhcpc/dhcpc.h"
+
+#include "osc.h"
 
 
 extern struct hybrid_dhcpc_osc_state s;
@@ -915,14 +900,12 @@ void udp_appcall()
 	//UARTprintf("Calling udp_appcall...\n");
 
     // Do some OSC-specific processing
-    // TODO: Move this to a function like dhcpc_appcall.
 	if (uip_newdata()) {
 		UARTprintf("%d bytes in\n", uip_datalen());
         UARTprintf("lport %d, rport %d\n", ntohs(uip_udp_conn->lport), ntohs(uip_udp_conn->rport));
         switch(ntohs(uip_udp_conn->lport)) {
         case OSC_LISTEN_PORT:
-            UARTprintf("Calling OSC routines\n");
-            osc_get_address(uip_appdata, uip_datalen());
+            osc_appcall(uip_appdata, uip_datalen());
             break;
         default:
             break;
@@ -932,18 +915,6 @@ void udp_appcall()
     // Pass onto the DHCP code, which needs to run whether or not any new data
     // has arrived (presumably, it will handle this by itself)
     dhcpc_appcall();
-}
-
-void osc_get_address(char * data, int length) {
-    char addr[200];
-    int i = 0;
-    for(; i < length && data[i]; ++i) {
-        addr[i] = data[i];
-    }
-    if (i < length) {
-        addr[i] = 0;
-    }
-    UARTprintf("OSC address: %s\n", addr);
 }
 
 void uip_log(char *m) {

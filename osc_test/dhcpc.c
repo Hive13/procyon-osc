@@ -1,3 +1,6 @@
+/* This is a modified version of dhcpc.c from uIP. Original copyright is below.
+ */
+
 /*
  * Copyright (c) 2005, Swedish Institute of Computer Science
  * All rights reserved.
@@ -245,7 +248,7 @@ static
 PT_THREAD(handle_dhcp(void))
 {
   PT_BEGIN(&s.pt);
-  UARTprintf("handle_dhcp\n");
+  //UARTprintf("handle_dhcp\n");
   /* try_again:*/
   s.state = STATE_SENDING;
   s.ticks = CLOCK_SECOND;

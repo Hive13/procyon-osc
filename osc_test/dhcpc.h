@@ -1,3 +1,6 @@
+/* This is a modified version of dhcpc.c from uIP. Original copyright is below.
+ */
+
 /*
  * Copyright (c) 2005, Swedish Institute of Computer Science
  * All rights reserved.

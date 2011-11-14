@@ -1,15 +1,5 @@
 /**
- * \addtogroup uipopt
- * @{
- */
-
-/**
- * \name Project-specific configuration options
- * @{
- *
- * uIP has a number of configuration options that can be overridden
- * for each project. These are kept in a project-specific uip-conf.h
- * file and all configuration names have the prefix UIP_CONF.
+ * Project-specific configuration options for uIP
  */
 
 #ifndef __UIP_CONF_H__
@@ -22,89 +12,37 @@
 #define NULL (void *)0
 #endif
 
-/**
- * 8 bit datatype
- *
- * This typedef defines the 8-bit type used throughout uIP.
- *
- * \hideinitializer
- */
+// 8-bit datatype
 typedef uint8_t u8_t;
 
-/**
- * 16 bit datatype
- *
- * This typedef defines the 16-bit type used throughout uIP.
- *
- * \hideinitializer
- */
+// 16-bit datatype
 typedef uint16_t u16_t;
 
-/**
- * Statistics datatype
- *
- * This typedef defines the dataype used for keeping statistics in
- * uIP.
- *
- * \hideinitializer
- */
+// Statistics datatype
 typedef unsigned short uip_stats_t;
 
-/**
- * Maximum number of TCP connections.
- *
- * \hideinitializer
- */
+// Maximum number of TCP connections.
 #define UIP_CONF_MAX_CONNECTIONS 40
 
-/**
- * Maximum number of listening TCP ports.
- *
- * \hideinitializer
- */
+// Maximum number of listening TCP ports.
 #define UIP_CONF_MAX_LISTENPORTS 40
 
-/**
- * uIP buffer size.
- *
- * \hideinitializer
- */
+// uIP buffer size.
 #define UIP_CONF_BUFFER_SIZE     420
 
-/**
- * CPU byte order.
- *
- * \hideinitializer
- */
+// CPU byte order.
 #define UIP_CONF_BYTE_ORDER      LITTLE_ENDIAN
 
-/**
- * Logging on or off
- *
- * \hideinitializer
- */
+// Logging on or off
 #define UIP_CONF_LOGGING         1
-void uip_log(char *m);
 
-/**
- * UDP support on or off
- *
- * \hideinitializer
- */
+// UDP support on or off
 #define UIP_CONF_UDP             1
 
-/**
- * UDP checksums on or off
- *
- * \hideinitializer
- */
+// UDP checksums on or off
 #define UIP_CONF_UDP_CHECKSUMS   1
 
-/**
- * uIP statistics on or off
- *
- * \hideinitializer
- */
+// uIP statistics on or off
 #define UIP_CONF_STATISTICS      1
 
 #define UIP_CONF_EXTERNAL_BUFFER 1
@@ -113,14 +51,15 @@ void uip_log(char *m);
 #include "dhcpc.h"
 
 typedef struct tcp_state uip_tcp_appstate_t;
-//typedef struct hybrid_dhcp_osc_state uip_udp_appstate_t;
 typedef struct hybrid_dhcpc_osc_state uip_udp_appstate_t;
 
 void udp_appcall();
+// This function is defined elsewhere to use UARTprintf so that UIP_LOG can
+// generate visible output:
+void uip_log(char *m);
+
 #define UIP_APPCALL udp_appcall
 #define UIP_UDP_APPCALL udp_appcall
 
 #endif /* __UIP_CONF_H__ */
 
-/** @} */
-/** @} */
