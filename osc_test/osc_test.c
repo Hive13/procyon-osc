@@ -28,6 +28,9 @@
 
 #include "osc.h"
 
+// If HEARTBEAT is true, then the system will echo dots in the main event
+// loop to signify that it has not crashed.
+#define HEARTBEAT 0
 
 extern struct hybrid_dhcpc_osc_state s;
 
@@ -742,6 +745,14 @@ ulUser1 = 10503937;
     dhcpc_request();
 #endif
 
+    // Set up OSC callbacks
+    {
+        g_osc_state.intCallback = &intEcho;
+        g_osc_state.floatCallback = &floatEcho;
+        g_osc_state.stringCallback = &stringEcho;
+        g_osc_state.blobCallback = &blobEcho;
+    }
+
     // Set up OSC listener (hopefully)
     {
         uip_ipaddr_t addr;
@@ -897,7 +908,9 @@ ulUser1 = 10503937;
 
 void udp_appcall()
 {
-	//UARTprintf("Calling udp_appcall...\n");
+    #if HEARTBEAT
+    UARTprintf(".");
+    #endif
 
     // Do some OSC-specific processing
 	if (uip_newdata()) {

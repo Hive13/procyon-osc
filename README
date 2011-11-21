@@ -2,6 +2,10 @@ This is for the Procyon board from Teho Labs. This specific project is to
 implement some OSC (Open Sound Control) functionality on the board. Right now,
 it gets an address via DHCP and listens for OSC messages on UDP port 12000.
 
+Simple callbacks may be set (see g_osc_state) for handling 32-bit int, 32-bit
+float, string, and blob arguments. Most other arg types (but not arrays and
+not bundles) are echoed out in some form, but not passed to any callbacks.
+
 It is a single part of a larger project to rework the glass block LED matrix
 for Hive13 (see link at the end) to combine the Processing and the Arduino
 halves into a single board.
