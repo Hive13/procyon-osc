@@ -5,6 +5,7 @@
 #ifndef __UIP_CONF_H__
 #define __UIP_CONF_H__
 
+#include "inc/lm3s9b90.h"
 #include <inttypes.h>
 
 // FIXME: Where is this definition?
@@ -57,6 +58,7 @@ void udp_appcall();
 // This function is defined elsewhere to use UARTprintf so that UIP_LOG can
 // generate visible output:
 void uip_log(char *m);
+void set_led(int status);
 
 #define UIP_APPCALL udp_appcall
 #define UIP_UDP_APPCALL udp_appcall

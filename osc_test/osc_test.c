@@ -19,6 +19,8 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/systick.h"
 #include "driverlib/udma.h"
+#include "driverlib/ssi.h"
+#include "driverlib/pin_map.h"
 #include "utils/uartstdio.h"
 #include "utils/ustdlib.h"
 #include "uip/uip.h"
@@ -33,7 +35,10 @@
 #define HEARTBEAT 0
 
 extern struct hybrid_dhcpc_osc_state s;
+void shiftbrite_command(int cmd, int red, int green, int blue);
+void set_up_spi(void);
 
+int delay_usec = -1;
 
 //*****************************************************************************
 //
@@ -567,7 +572,14 @@ main(void)
     GPIOPinConfigure(GPIO_PA1_U0TX);
     ROM_GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
     UARTStdioInit(0);
-    UARTprintf("\033[2JEthernet with uIP\n");
+    UARTprintf("\033[2JStarting osc_test...\n");
+
+    // Compute a delay time for SysCtlClockGet():
+    // SysCtlDelay = 3 cycles per iteration
+    // t us * (1 s / 1e6 us) * (f cycles / s) * (1 iter / 3 cycles)
+    //  = t * f / (3 * 1e6) iterations
+    delay_usec = SysCtlClockGet() / (3 * 1000000);
+    UARTprintf("One microsecond = %d cycles?\n", delay_usec);
 
     //
     // Enable the uDMA controller and set up the control table base.
@@ -583,6 +595,34 @@ main(void)
     uDMAChannelControlSet(UDMA_CHANNEL_ETH0TX,
                               UDMA_SIZE_32 | UDMA_SRC_INC_32 |
                               UDMA_DST_INC_NONE | UDMA_ARB_8);
+
+    // Set up our SPI output...
+    set_up_spi();
+
+    // Set up initial brightness control for ShiftBrite
+
+    shiftbrite_command(1, 65, 50, 50);
+    shiftbrite_command(0, 0, 0, 0);
+    UARTprintf("Set dot correction registers on ShiftBrite...\n");
+    // This section is skipped for now.
+    if (0)
+    {
+        int i = 0;
+
+
+        // All but the lowest 8 bits of the number passed in are ignored
+        do {
+            if (i % 10000 == 0) {
+                UARTprintf("Still alive...\n");
+            }
+
+            // Set pixel values
+            shiftbrite_command(0, (i >> 7) % 255, (i >> 8) % 255, (i >> 9) % 255);
+
+            ++i;
+        } while (1);
+    }
+
 
     //
     // Read the MAC address from the user registers.
@@ -602,8 +642,9 @@ main(void)
     }
 */
 
-ulUser0 = 11934208;
-ulUser1 = 10503937;
+    // Hard-code MAC address:
+    ulUser0 = 11934208;
+    ulUser1 = 10503937;
     //
     // Enable and Reset the Ethernet Controller.
     //
@@ -913,7 +954,7 @@ void udp_appcall()
     #endif
 
     // Do some OSC-specific processing
-	if (uip_newdata()) {
+    if (uip_newdata()) {
 		UARTprintf("%d bytes in\n", uip_datalen());
         UARTprintf("lport %d, rport %d\n", ntohs(uip_udp_conn->lport), ntohs(uip_udp_conn->rport));
         switch(ntohs(uip_udp_conn->lport)) {
@@ -923,7 +964,7 @@ void udp_appcall()
         default:
             break;
         }
-	}
+    }
 
     // Pass onto the DHCP code, which needs to run whether or not any new data
     // has arrived (presumably, it will handle this by itself)
@@ -933,4 +974,57 @@ void udp_appcall()
 void uip_log(char *m) {
     UARTprintf(m);
 }
+
+//Waste cycle delay function
+void myDelay(unsigned long delay)
+{ 
+	while(delay)
+	{ 
+		delay--;
+		__asm__ __volatile__("mov r0,r0");
+	}
+}
+
+// This functionality should be moved elsewhere!
+void set_up_spi(void) {
+    //
+    // Set up SSI0 for SPI.
+    //
+    UARTprintf("Attempting to enable SPI...\n");
+    // Set up PA2 (Clk), PA4 (Rx), PA5 (Tx) to use SSI0 peripheral.
+    // (Leave out PA5 (Fss) because we want to toggle it manually)
+    ROM_GPIOPinTypeSSI(GPIO_PORTA_BASE, GPIO_PIN_2|GPIO_PIN_4|GPIO_PIN_5);
+    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI0);
+    // Set clock to 8 bits & the given rate in Hz
+    ROM_SSIConfigSetExpClk(SSI0_BASE, ROM_SysCtlClockGet(),
+        SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, 200000, 8);
+    ROM_SSIEnable(SSI0_BASE);
+    // Set PA3 to GPIO as we must manually set this latch
+    ROM_GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_3);
+    UARTprintf("Enabled SPI!\n");
+}
+
+
+void shiftbrite_command(int cmd, int red, int green, int blue) {
+
+    // Make sure we are latched low initially
+    ROM_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0x00);
+
+    ROM_SSIDataPut(SSI0_BASE, cmd << 6 | blue >> 4);
+    while(ROM_SSIBusy(SSI0_BASE));
+    ROM_SSIDataPut(SSI0_BASE, blue << 4 | red >> 6);
+    while(ROM_SSIBusy(SSI0_BASE));
+    ROM_SSIDataPut(SSI0_BASE, red << 2 | green >> 8);
+    while(ROM_SSIBusy(SSI0_BASE));
+    ROM_SSIDataPut(SSI0_BASE, green);
+    while(ROM_SSIBusy(SSI0_BASE));
+        
+    // Latch high and then back low (make sure to pull it low
+    // before the rising edge of the next clock)
+    SysCtlDelay(delay_usec); // Set this delay carefully when more LEDs are in the chain
+    ROM_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0xFF);
+    SysCtlDelay(delay_usec);
+    ROM_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0x00);
+}
+
 

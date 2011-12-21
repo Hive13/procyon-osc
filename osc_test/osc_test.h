@@ -38,7 +38,7 @@ struct tcp_state {
     int a;
 };
 
-
+void enable_led();
 
 #endif /* __OSCTEST_H__ */
 

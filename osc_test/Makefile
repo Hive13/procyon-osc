@@ -1,59 +1,20 @@
-#******************************************************************************
-#
-# Makefile - Rules for building the Ethernet with uIP.
-#
-# Copyright (c) 2009-2011 Texas Instruments Incorporated.  All rights reserved.
-# Software License Agreement
-# 
-# Texas Instruments (TI) is supplying this software for use solely and
-# exclusively on TI's microcontroller products. The software is owned by
-# TI and/or its suppliers, and is protected under applicable copyright
-# laws. You may not combine this software with "viral" open-source
-# software in order to form a larger program.
-# 
-# THIS SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS.
-# NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT
-# NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. TI SHALL NOT, UNDER ANY
-# CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES, FOR ANY REASON WHATSOEVER.
-# 
-# This is part of revision 7611 of the EK-LM3S9B90 Firmware Package.
-#
-#******************************************************************************
-
-#
 # Defines the part type that this project uses.
-#
 PART=LM3S9B90
 
-#Program name
-NAME = osc_test
+# Program name
+NAME=osc_test
 
-#include the toolchain settings 
+# Include global toolchain settings 
 include $.../toolchainsettings
 
-#For readablity we repeat the contents of toolchainsettings here:
-
-##start toolchain settings
-##COMPORT should be COMx or /dev/ttyUSBx or similar for windows and linux respectivly
-#COMPORT = /dev/ttyS3
-#SERIALPROG = 0
-#WINDOWS = 0
-
-##Use forward slashes for the paths
-##DIR_STELLARISWARE is typically C:/Users/USERNAME/Development/StellarisWare or /home/USERNAME/Development/StellarisWare
-#DIR_STELLARISWARE = /home/USERNAME/Development/StellarisWare
-#DIR_DRIVERLIB = $(DIR_STELLARISWARE)/driverlib
-#DIR_USBLIB = $(DIR_STELLARISWARE)/usblib
-#DIR_UTILS = $(DIR_STELLARISWARE)/utils
-
-##end toolchain settings
-
-
 #Toolchain Command Config
-
 os:=${shell uname -s}
+CC      = arm-none-eabi-gcc
+LD      = arm-none-eabi-ld -v
+AR      = arm-none-eabi-ar
+AS      = arm-none-eabi-as
+CP      = arm-none-eabi-objcopy
+OD	= arm-none-eabi-objdump
 
 CYGWIN = 0
 ifneq ($(findstring CYGWIN, ${os}), )
@@ -69,15 +30,12 @@ ifeq ($(SERIALPROG),1)
 	endif
 else
 	LINKER = link.ld
-
 	ifeq ($(WINDOWS),1)
 		FLASHCMD = perl ./do_flash.pl $(NAME).bin
 	else 
 		FLASHCMD = ./do_flash.pl $(NAME).bin
 	endif
-
 endif
-
 
 ifeq ($(WINDOWS),1)	
 	ifeq ($(CYGWIN),1)
@@ -92,28 +50,18 @@ else
 	COPYCMD = cp ./${COMPILER}/$(NAME).bin ./
 endif
 
-#
 # The base directory for StellarisWare.
-#
 ROOT=$(DIR_STELLARISWARE)
 
-#
 # Include the common make definitions.
-#
 include ${ROOT}/makedefs
 
-
-#
 # Where to find source files that do not live in this directory.
-#
-#VPATH=$(DIR_STELLARISWARE)/third_party/uip-1.0/apps/dhcpc
 VPATH+=$(DIR_STELLARISWARE)/third_party/uip-1.0/apps/httpd
 VPATH+=$(DIR_STELLARISWARE)/third_party/uip-1.0/uip
 VPATH+=$(DIR_STELLARISWARE)/utils
 
-#
 # Where to find header files that do not live in the source directory.
-#
 IPATH=.
 IPATH+=$(DIR_STELLARISWARE)
 IPATH+=$(DIR_STELLARISWARE)/third_party/uip-1.0/apps
@@ -121,32 +69,27 @@ IPATH+=$(DIR_STELLARISWARE)/third_party/uip-1.0/uip
 IPATH+=$(DIR_STELLARISWARE)/third_party/uip-1.0
 
 # The default rule, which causes the Ethernet with uIP to be built.
-#
-all: ${COMPILER}
-all: ${COMPILER}/osc_test.axf
+all: ${COMPILER} ${COMPILER}/osc_test.axf
 
-#
 # The rule to clean out all the build products.
-#
-clean:
-	@rm -rf ${COMPILER} ${wildcard *~}
+clean:	
+	@echo Target 'clean' 
+	rm -rf ${COMPILER} ${wildcard *~}
 
-#
 # Build and flash
-#
 flash: all 
+	@echo Target 'flash' 
+	@echo Flash command: $(FLASHCMD)
+	@echo Copy command: $(COPYCMD)
 	$(COPYCMD)
 	$(FLASHCMD)
 
-#
 # The rule to create the target directory.
-#
-${COMPILER}:
-	@mkdir -p ${COMPILER}
+${COMPILER}: 
+	@echo Target ${COMPILER}
+	mkdir -p ${COMPILER}
 
-#
 # Rules for building the Ethernet with uIP.
-#
 ${COMPILER}/osc_test.axf: ${COMPILER}/osc.o
 ${COMPILER}/osc_test.axf: ${COMPILER}/dhcpc.o
 ${COMPILER}/osc_test.axf: ${COMPILER}/osc_test.o
@@ -162,10 +105,19 @@ ${COMPILER}/osc_test.axf: $(LINKER)
 SCATTERgcc_osc_test=$(LINKER)
 ENTRY_osc_test=ResetISR
 CFLAGSgcc=-DTARGET_IS_TEMPEST_RC5
+CPFLAGS=-Obinary
+LFLAGS=-T $(LINKER) -nostartfiles
+CP=arm-none-eabi-objcopy
 
-#
+#reg: $(NAME).elf
+#        $(CP) $(CPFLAGS) $(NAME).elf $(NAME).bin
+
+#$(NAME).elf: $(SOURCES) link.ld 
+#        $(CC) $(MACROS) $(CFLAGS) $(LFLAGS) -o $(NAME).elf  $(SOURCES)
+
+
 # Include the automatically generated dependency files.
-#
 ifneq (${MAKECMDGOALS},clean)
 -include ${wildcard ${COMPILER}/*.d} __dummy__
 endif
+

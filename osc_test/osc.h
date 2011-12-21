@@ -10,6 +10,7 @@ void stringEcho(int argnum, char * value, int length);
 void blobEcho(int argNum, char * value, int length);
 
 struct osc_state {
+    char * addressPattern;
     void (*intCallback) (int argNum, int value);
     void (*floatCallback) (int argNum, float value);
     void (*stringCallback) (int argNum, char * value, int length);

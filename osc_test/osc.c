@@ -52,6 +52,8 @@ void osc_parse(char * data, int dataLength) {
     UARTprintf("%s: %s\n", fields[0], addr);
     UARTprintf("%s: %s\n", fields[1], typetag);
 
+    g_osc_state.addressPattern = addr;
+
     // (typetag - data) is an adjustment for how much our offsets change when
     // we're referring to the typetag pointer rather than 'data'.
     osc_dispatch_callbacks(typetag, offset - (typetag - data), dataLength - (typetag - data));
@@ -105,7 +107,8 @@ void osc_dispatch_callbacks(char * typetag, int argOffset, int maxLength) {
             // Untested (oscP5 won't send longs?)
             {
                 long val = bigEndianLong(typetag + argOffset);
-                UARTprintf("Arg %d: Long %ld\n", argNum, val);
+                // Can't print longs this way:
+                //UARTprintf("Arg %d: Long %ld\n", argNum, val);
             }
             argOffset += 8;
             break;
