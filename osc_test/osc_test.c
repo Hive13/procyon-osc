@@ -28,6 +28,7 @@
 //#include "httpd/httpd.h"
 #include "dhcpc/dhcpc.h"
 
+#include "shiftbrite.h"
 #include "osc.h"
 
 // If HEARTBEAT is true, then the system will echo dots in the main event
@@ -35,8 +36,7 @@
 #define HEARTBEAT 0
 
 extern struct hybrid_dhcpc_osc_state s;
-void shiftbrite_command(int cmd, int red, int green, int blue);
-void set_up_spi(void);
+void set_up_spi(int clock_speed);
 
 int delay_usec = -1;
 
@@ -596,31 +596,48 @@ main(void)
                               UDMA_SIZE_32 | UDMA_SRC_INC_32 |
                               UDMA_DST_INC_NONE | UDMA_ARB_8);
 
-    // Set up our SPI output...
-    set_up_spi();
-
-    // Set up initial brightness control for ShiftBrite
-
-    shiftbrite_command(1, 65, 50, 50);
-    shiftbrite_command(0, 0, 0, 0);
-    UARTprintf("Set dot correction registers on ShiftBrite...\n");
-    // This section is skipped for now.
-    if (0)
+    // Set up our SPI output, 200 kHz
+    set_up_spi(200000);
+    
     {
-        int i = 0;
+        int lights = 8;
 
+        {
+            int i = 0;
+            int j = 0;
 
-        // All but the lowest 8 bits of the number passed in are ignored
-        do {
-            if (i % 10000 == 0) {
-                UARTprintf("Still alive...\n");
+            // All but the lowest 8 bits of the number passed in are ignored
+            while (1) {
+                if (i % 10000 == 0) {
+                    UARTprintf("Still alive...\n");
+                }
+
+                // Set the dot correction registers.
+                // (This should not be a prerequisite to every single color
+                // command. However, the ShiftBrite appears to have some
+                // flakiness - particularly to minor electrical disturbances
+                // such as touching a scope probe to a pin - which this
+                // partially remedies, as it seems that the corruption is
+                // identical to those cases where the color correction
+                // registers have never been sent in the first place.)
+                for(j = 0; j < lights; ++j) {
+                    shiftbrite_command(1, 65, 50, 50);
+                }
+                shiftbrite_latch();
+
+                // Set pixel values
+                for(j = 0; j < lights; ++j)
+                {
+                    // Just a simple time-varying test pattern:
+                    int r = ((i >> 4) + 255*j/lights) % 255;
+                    int g = (255 * j) / (lights - 1);
+                    int b = 255 - g;
+                    shiftbrite_command(0, r, g, b);
+                }
+                shiftbrite_latch();
+                ++i;
             }
-
-            // Set pixel values
-            shiftbrite_command(0, (i >> 7) % 255, (i >> 8) % 255, (i >> 9) % 255);
-
-            ++i;
-        } while (1);
+        }
     }
 
 
@@ -986,45 +1003,22 @@ void myDelay(unsigned long delay)
 }
 
 // This functionality should be moved elsewhere!
-void set_up_spi(void) {
+void set_up_spi(int clock_speed) {
     //
     // Set up SSI0 for SPI.
     //
-    UARTprintf("Attempting to enable SPI...\n");
+    UARTprintf("Attempting to enable SPI with %d Hz clock...\n", clock_speed);
     // Set up PA2 (Clk), PA4 (Rx), PA5 (Tx) to use SSI0 peripheral.
     // (Leave out PA5 (Fss) because we want to toggle it manually)
     ROM_GPIOPinTypeSSI(GPIO_PORTA_BASE, GPIO_PIN_2|GPIO_PIN_4|GPIO_PIN_5);
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI0);
     // Set clock to 8 bits & the given rate in Hz
     ROM_SSIConfigSetExpClk(SSI0_BASE, ROM_SysCtlClockGet(),
-        SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, 200000, 8);
+        SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, clock_speed, 8);
     ROM_SSIEnable(SSI0_BASE);
     // Set PA3 to GPIO as we must manually set this latch
     ROM_GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_3);
     UARTprintf("Enabled SPI!\n");
-}
-
-
-void shiftbrite_command(int cmd, int red, int green, int blue) {
-
-    // Make sure we are latched low initially
-    ROM_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0x00);
-
-    ROM_SSIDataPut(SSI0_BASE, cmd << 6 | blue >> 4);
-    while(ROM_SSIBusy(SSI0_BASE));
-    ROM_SSIDataPut(SSI0_BASE, blue << 4 | red >> 6);
-    while(ROM_SSIBusy(SSI0_BASE));
-    ROM_SSIDataPut(SSI0_BASE, red << 2 | green >> 8);
-    while(ROM_SSIBusy(SSI0_BASE));
-    ROM_SSIDataPut(SSI0_BASE, green);
-    while(ROM_SSIBusy(SSI0_BASE));
-        
-    // Latch high and then back low (make sure to pull it low
-    // before the rising edge of the next clock)
-    SysCtlDelay(delay_usec); // Set this delay carefully when more LEDs are in the chain
-    ROM_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0xFF);
-    SysCtlDelay(delay_usec);
-    ROM_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0x00);
 }
 
 
