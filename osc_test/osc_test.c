@@ -28,6 +28,7 @@
 //#include "httpd/httpd.h"
 #include "dhcpc/dhcpc.h"
 
+#include "osc_shiftbrite_receiver.h"
 #include "shiftbrite.h"
 #include "osc.h"
 
@@ -598,9 +599,12 @@ main(void)
 
     // Set up our SPI output, 200 kHz
     set_up_spi(200000);
-    
+   
+    //if (0) 
     {
-        int lights = 8;
+        int px = 0, py = 0;
+        unsigned char * img = shiftbrite_get_image(&px, &py);
+        int lights = px * py;
 
         {
             int i = 0;
@@ -620,21 +624,21 @@ main(void)
                 // partially remedies, as it seems that the corruption is
                 // identical to those cases where the color correction
                 // registers have never been sent in the first place.)
-                for(j = 0; j < lights; ++j) {
+                shiftbrite_dot_correct(lights, 65, 50, 50);
+                /*for(j = 0; j < lights; ++j) {
                     shiftbrite_command(1, 65, 50, 50);
+                    //shiftbrite_command(1, 10, 10, 10);
                 }
-                shiftbrite_latch();
+                shiftbrite_delay_latch(lights);*/
 
-                // Set pixel values
-                for(j = 0; j < lights; ++j)
-                {
-                    // Just a simple time-varying test pattern:
-                    int r = ((i >> 4) + 255*j/lights) % 255;
-                    int g = (255 * j) / (lights - 1);
-                    int b = 255 - g;
-                    shiftbrite_command(0, r, g, b);
+                // Make a simple test pattern:
+                for(j = 0; j < lights; ++j) {
+                    img[3*j + 0] = ((i >> 2) + 255*j/lights) % 255;
+                    img[3*j + 1] = (255 * j) / (lights - 1);
+                    img[3*j + 2] = 255 - img[3*j + 1];
                 }
-                shiftbrite_latch();
+                shiftbrite_push_image(img, px, py);
+                
                 ++i;
             }
         }
@@ -803,9 +807,15 @@ main(void)
     dhcpc_request();
 #endif
 
+    // Set up ShiftBrite OSC routines
+    {
+        shiftbrite_osc_init();
+    }
+
     // Set up OSC callbacks
     {
-        g_osc_state.intCallback = &intEcho;
+        //g_osc_state.intCallback = &intEcho;
+        g_osc_state.intCallback = &shiftbrite_osc_int_callback;
         g_osc_state.floatCallback = &floatEcho;
         g_osc_state.stringCallback = &stringEcho;
         g_osc_state.blobCallback = &blobEcho;
@@ -1015,6 +1025,8 @@ void set_up_spi(int clock_speed) {
     // Set clock to 8 bits & the given rate in Hz
     ROM_SSIConfigSetExpClk(SSI0_BASE, ROM_SysCtlClockGet(),
         SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, clock_speed, 8);
+    // Set this delay carefully when more LEDs are in the chain
+
     ROM_SSIEnable(SSI0_BASE);
     // Set PA3 to GPIO as we must manually set this latch
     ROM_GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_3);

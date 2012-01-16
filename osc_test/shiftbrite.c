@@ -16,12 +16,16 @@
 #include "driverlib/pin_map.h"
 #include "utils/uartstdio.h"
 #include "utils/ustdlib.h"
+#include "uip-conf.h"
+
+#include <math.h>
 
 #include "shiftbrite.h"
 
 // Is this the best way to do this? It requires another file to have inited
 // properly.
 extern int delay_usec;
+static unsigned char shiftbrite_image[3*SHIFTBRITE_MAX_X*SHIFTBRITE_MAX_Y];
 
 void shiftbrite_command(int cmd, int red, int green, int blue) {
     // Make sure we are latched low initially
@@ -37,6 +41,12 @@ void shiftbrite_command(int cmd, int red, int green, int blue) {
     while(ROM_SSIBusy(SSI0_BASE));
 }
 
+void shiftbrite_delay_latch(int lights) {
+    float usec = 20.0/1000 + 5.0/1000.0 * lights;
+    SysCtlDelay(delay_usec * ceil(usec));
+    shiftbrite_latch();
+}
+
 void shiftbrite_latch(void) {
     // Latch high and then back low (make sure to pull it low
     // before the rising edge of the next clock)
@@ -45,4 +55,41 @@ void shiftbrite_latch(void) {
     ROM_GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_3, 0x00);
 }
 
+void shiftbrite_push_image(unsigned char * img, unsigned int x, unsigned int y) {
+    int row, col;
+    
+    for(col = x - 1; col >= 0; --col) {
+        if (col % 2) {
+            for(row = y - 1; row >= 0; --row) {
+                unsigned char * offset = img + 3*(x*col + row);
+                shiftbrite_command(0, offset[0], offset[1], offset[2]);
+            }
+        } else {
+             for(row = 0; row < y; ++row) {
+                unsigned char * offset = img + 3*(x*col + row);
+                shiftbrite_command(0, offset[0], offset[1], offset[2]);
+            }
+        }
+    }
+    shiftbrite_delay_latch(x*y);
+    shiftbrite_latch();
+}
+
+unsigned char * shiftbrite_get_image(int * x_out, int * y_out) {
+    if (x_out != NULL) {
+        *x_out = SHIFTBRITE_MAX_X;
+    }
+    if (y_out != NULL) {
+        *y_out = SHIFTBRITE_MAX_Y;
+    }
+    return shiftbrite_image;
+}
+
+void shiftbrite_dot_correct(int lights, int r, int g, int b) {
+    int j;
+    for(j = 0; j < lights; ++j) {
+        shiftbrite_command(1, 65, 50, 50);
+    }
+    shiftbrite_delay_latch(lights);
+}
 

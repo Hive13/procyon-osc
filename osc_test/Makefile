@@ -92,6 +92,7 @@ ${COMPILER}:
 # Rules for building
 ${COMPILER}/osc_test.axf: ${COMPILER}/osc.o
 ${COMPILER}/osc_test.axf: ${COMPILER}/shiftbrite.o
+${COMPILER}/osc_test.axf: ${COMPILER}/osc_shiftbrite_receiver.o
 ${COMPILER}/osc_test.axf: ${COMPILER}/dhcpc.o
 ${COMPILER}/osc_test.axf: ${COMPILER}/osc_test.o
 ${COMPILER}/osc_test.axf: ${COMPILER}/httpd.o

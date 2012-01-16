@@ -73,7 +73,7 @@ void osc_dispatch_callbacks(char * typetag, int argOffset, int maxLength) {
     UARTprintf("osc_dispatch_callbacks(\"%s\", %d, %d)\n", typetag, argOffset, maxLength);
 
     if (typetag[0] != ',') {
-        UARTprintf("This is not a typetag (no comma)!\n");
+        UARTprintf("[WARNING] This lacks a comma and is thus not a typetag?\n");
     }
     while (typetag[argNum] && argNum < maxLength) {
         switch(typetag[argNum]) {
@@ -113,7 +113,7 @@ void osc_dispatch_callbacks(char * typetag, int argOffset, int maxLength) {
             argOffset += 8;
             break;
         case 't':
-            // TODO: Handle timetag
+            UARTprintf("[ERROR] Arg %d is a timetag; not implemented!\n", argNum);
             break;
         case 'd':
             // Untested
