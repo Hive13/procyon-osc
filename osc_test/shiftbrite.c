@@ -75,6 +75,10 @@ void shiftbrite_push_image(unsigned char * img, unsigned int x, unsigned int y) 
     shiftbrite_latch();
 }
 
+void shiftbrite_refresh() {
+    shiftbrite_push_image(shiftbrite_image, SHIFTBRITE_MAX_X, SHIFTBRITE_MAX_Y);
+}
+
 unsigned char * shiftbrite_get_image(int * x_out, int * y_out) {
     if (x_out != NULL) {
         *x_out = SHIFTBRITE_MAX_X;

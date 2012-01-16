@@ -20,6 +20,10 @@ void shiftbrite_latch(void);
 // It is latched automatically at the end.
 void shiftbrite_push_image(unsigned char * img, unsigned int x, unsigned int y);
 
+// Refresh the display with the current image. This is generally only needed
+// on a wonky ShiftBrite set up where the end of the chain has issues.
+void shiftbrite_refresh();
+
 // Get the pointer to the image. This will be an array with:
 // SHIFTBRITE_MAX_X * SHIFTBRITE_MAX_Y * 3
 // elements in number.

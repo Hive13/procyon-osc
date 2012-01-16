@@ -94,11 +94,10 @@ void osc_dispatch_callbacks(char * typetag, int argOffset, int maxLength) {
             argOffset = (argOffset + 3) & ~0x03;
             break;
         case 'b': // Binary blob (32-bit size comes first)
-            // Untested
             // This value gives the length of the blob in bytes.
             intVal = (int *) (typetag + argOffset);
             argOffset += 4;
-            g_osc_state.blobCallback(argNum, typetag + argOffset, *intVal);
+            g_osc_state.blobCallback(argNum, typetag + argOffset, ntohl(*intVal));
             argOffset += *intVal;
             // Pad to be a multiple of 4 bytes (as blob data must also be)
             argOffset = (argOffset + 3) & ~0x03;

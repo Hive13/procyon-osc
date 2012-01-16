@@ -600,7 +600,7 @@ main(void)
     // Set up our SPI output, 200 kHz
     set_up_spi(200000);
    
-    //if (0) 
+    if (0) 
     {
         int px = 0, py = 0;
         unsigned char * img = shiftbrite_get_image(&px, &py);
@@ -814,11 +814,13 @@ main(void)
 
     // Set up OSC callbacks
     {
-        //g_osc_state.intCallback = &intEcho;
-        g_osc_state.intCallback = &shiftbrite_osc_int_callback;
+        g_osc_state.intCallback = &intEcho;
+        //g_osc_state.intCallback = &shiftbrite_osc_int_callback;
         g_osc_state.floatCallback = &floatEcho;
         g_osc_state.stringCallback = &stringEcho;
-        g_osc_state.blobCallback = &blobEcho;
+        //g_osc_state.stringCallback = &shiftbrite_osc_string_callback;
+        //g_osc_state.blobCallback = &blobEcho;
+        g_osc_state.blobCallback = &shiftbrite_osc_blob_callback;
     }
 
     // Set up OSC listener (hopefully)
