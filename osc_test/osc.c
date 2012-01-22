@@ -1,8 +1,8 @@
 #include "utils/uartstdio.h"
 #include "utils/ustdlib.h"
 #include "uip/uip.h"
-#include "string.h"
-#include "stdlib.h"
+#include <string.h>
+#include <stdlib.h>
 #include "osc.h"
 
 // Endianness conversion macro
@@ -89,6 +89,8 @@ void osc_dispatch_callbacks(char * typetag, int argOffset, int maxLength) {
         case 'S': // Symbol
         case 's': // String
             g_osc_state.stringCallback(argNum, typetag + argOffset, maxLength - argOffset);
+            // For some reason, strnlen is implicitly declared here though
+            // I've #included string.h. The code still links and runs though.
             argOffset += strnlen(typetag + argOffset, maxLength - argOffset);
             // Pad to be a multiple of 4 bytes (as OSC strings must be)
             argOffset = (argOffset + 3) & ~0x03;
@@ -105,9 +107,9 @@ void osc_dispatch_callbacks(char * typetag, int argOffset, int maxLength) {
         case 'h':
             // Untested (oscP5 won't send longs?)
             {
-                long val = bigEndianLong(typetag + argOffset);
+                // long val = bigEndianLong(typetag + argOffset);
                 // Can't print longs this way:
-                //UARTprintf("Arg %d: Long %ld\n", argNum, val);
+                // UARTprintf("Arg %d: Long %ld\n", argNum, val);
             }
             argOffset += 8;
             break;

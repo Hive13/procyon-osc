@@ -1,0 +1,155 @@
+Shiftbrite notes:
+Gnd
+10: D, data
+11: L, latch (active-low)
+12: E, enable (active-low)
+13: C, clock
+V+
+
+P3 has: SSI0Clk, SSI0Fss, SSI0Rx, SSI0Tx
+
+SPI:
+Serial clock (from master) / Clk
+MOSI/SIMO: Master out, slave in
+MISO/SOMI: Maser in, slave out
+SS: Slave select (from master) / Fss
+
+OpenOCD & JTAG:
+- telnet is on port 4444:
+reset halt
+flash write_image erase foo.bin
+reset run
+- debugger is on port 3333:
+Use "arm-none-eabi-gdb foo.elf"
+target remote localhost:3333
+monitor reset halt
+load
+continue
+...and go about your normal GDBing
+
+All in the Stellaris ROM:
+ROM_SSIDataPut
+ROM_SSIDisable/Enable
+ROM_SSIConfigSetExpClk - set clock rates
+SSI also can use DMA for transfers (see ROM calls)
+
+See datasheet, p761.
+
+Shiftbrite needs 5V, but SPI Vdd ~= 3.3 V.
+
+----------------
+2011-12-03 notes
+----------------
+1. SPI appears to be working, using Fss as the (manually-controlled) latch
+rather than SPI peripheral.
+2. I am fairly confident I'm outputting the correct ShiftBrite signals,
+however, I don't know a good baud rate to set and I've yet to apply the proper
+(5V) voltage as the connector with SPI has only 3.3 V.
+ - Is 3.3 V logic high stll sufficient? (later note: yes)
+ - Re baud rate: Make sure your latch goes back _low_ before next clock goes
+_high_.
+3. I need to redo the Makefiles and get a proper ELF that GDB can grok.
+4. Be careful poking around on live electronics. If you short Vcc, the
+computer may disable the USB device because it is sinking too much current.
+5. Look at building a more robust connector for the ShiftBrite module. Perhaps
+use the Arduino shield? It's going to need an external supply either way.
+6. For C: Consider address-based callbacks for OSC, perhaps more hierarchical -
+it'll make it more useful to anyone wanting to use it.
+7. Get a proper JTAG cable!
+
+Note that the clock's pulses when the ShiftBrite redrives the clock are very
+fast pulses and may be tricky to pick out on a scope.
+
+----------
+2011-12-20
+----------
+It is not working. The trick was merely to have the output enable low (it is
+active-low)
+Side question: How do I build so I can debug with JTAG? Makefiles are
+ambiguous.
+
+----------
+2012-01-01
+----------
+Lighting up a chain works. I still should compute the proper delay though.
+
+Make sure you set current control for _all_ LEDs.
+
+Strange issues will crop up if you do not use a high enough voltage for the
+ShiftBrite chain - touching contacts with fingers or a scope probe (even a
+disconnected one) can make it glitch out and behave very erratically, even
+through resets.
+
+Changing the routine to set current control registers before any color commands
+seems to help somewhat.
+Flickering can be seen now when touching contacts but it quickly rights itself.
+
+Lowering clock does not help these issues.
+
+Power supply, unloaded: 5.14 V
+1st ShiftBrite Vdd: 4.90 V
+Last SB (of 56) Vdd: 3.60 V
+SB #28: 3.90 V
+SB #16: 4.20 V
+
+No wonder there are issues occurring. Those voltage probably are sufficient to
+induce undervoltage lockout (UVLO) mode.
+
+Using a 9 V supply rather than 5 V brings in no apparent issues. The end of the
+chain is around 7.1 V. No glitches observed after 48 hours.
+
+----------
+2012-01-15
+----------
+oscP5 when sending > 64 integer arguments in one OSC packet results in a 'bad
+checksum' message from uIP.
+oscP5 as the receiver (e.g. my dumpOsc project) does not acknowledge the
+packets either so I suspect it is an oscP5 issue, not a uIP one.
+
+Yet if I try the same with liblo and uIP, the bad checksum message persists.
+
+Wireshark shows all the UDP checksums as being bad, even on valid-looking
+cases, but says it may be from "UDP checksum offload". To turn this off:
+ethtool --offload eth0 rx off tx off
+
+With this:
+Sending from oscP5: "udp: bad checksum" from uIP
+Sending from pyliblo: "ip: fragment dropped" from uIP
+
+So turning off checksum offloading makes Wireshark see correct checksums, but
+not uIP.
+
+I wonder if any of this is because I am doing this work inside of a VM in
+VirtualBox (OS X is the host, Ubuntu Linux is the guest) - Linux will be using
+an emulated NIC here.
+
+In any case, I worked around this issue by just sending a blob instead of a
+bunch of integers. It's easier to work with anyhow; it takes up less data and
+I can simply memcpy from one callback rather than dealing with 56*3 calls to
+the integer callback.
+
+----------
+2012-01-22
+----------
+To work with Android on VirtualBox:
+1) Pass through the device's USB (you may need to do this in the VM's settings
+preemptively)
+2) Kill ADB server and run as root, e.g.:
+sudo ./adb kill-server
+sudo ./adb start-server
+3) Try "./adb devices" again
+
+When working with Processing, make sure to go to Android / Sketch Permissions
+and enable INTERNET if your sketch is going to need to open sockets (for
+example).
+
+Processing & oscP5 on Android (via dumpOsc): Works for receiving OSC!
+
+However, sending (via oscP5sendReceive) is not working. I ran exactly the same
+sketch on both my laptop and on the Android device, but only on the laptop did
+any packets appear to be sent.
+So the receiving box is listening just fine, and oscP5 seems to be working
+fine (to the point of receiving packets at least), but I still cannot send
+for some reason.
+
+It now appears to be working. The issue is still not yet understood.

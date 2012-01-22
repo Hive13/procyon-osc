@@ -801,7 +801,7 @@ main(void)
     //
     // Initialize the DHCP Client Application.
     //
-	UARTprintf("Making DHCP request...\n");
+    UARTprintf("Making DHCP request...\n");
 
     dhcpc_init(&sTempAddr.addr[0], 6);
     dhcpc_request();
@@ -963,6 +963,8 @@ main(void)
                 }
             }
 #endif
+            // If not doing anything else, refresh the display.
+            shiftbrite_refresh();
         }
 
         //

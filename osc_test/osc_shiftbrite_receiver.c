@@ -18,7 +18,13 @@ void shiftbrite_osc_init() {
     if (shiftbrite_image == NULL) {
         UARTprintf("[ERROR] shiftbrite_get_image returned null pointer!\n");
     } else {
-        UARTprintf("shiftbrite_osc_init successful! Screen is %dx%d\n", shiftbrite_x, shiftbrite_y);
+        int i;
+        for(i = 0; i < shiftbrite_x*shiftbrite_y*3; ++i)
+        {
+            // Initialize to simple test pattern:
+            shiftbrite_image[i] = i % 255;    
+        }
+       UARTprintf("shiftbrite_osc_init successful! Screen is %dx%d\n", shiftbrite_x, shiftbrite_y);
     }
 }
 
