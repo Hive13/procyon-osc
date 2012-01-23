@@ -9,6 +9,11 @@
 // shiftbrite_delay_latch)
 void shiftbrite_command(int cmd, int red, int green, int blue);
 
+// Set the values used in dot correction. Note that this doesn't actually
+// send the packet, it just sets the values that will be used upon calling
+// shiftbrite_dot_correct.
+void shiftbrite_set_dot_correction(int r, int g, int b);
+
 // Toggle the latch - setting it high for about 1 usec, and then setting it
 // back low. This is needed to actually invoke the command.
 void shiftbrite_latch(void);
@@ -32,9 +37,10 @@ void shiftbrite_refresh();
 // horizontal pixels and in vertical pixels.
 unsigned char * shiftbrite_get_image(int * x_out, int * y_out);
 
-// Apply the dot correction command with the given r, g, and b values,
-// to 'lights' shiftbrites. It is latched automatically at the end.
-void shiftbrite_dot_correct(int lights, int r, int g, int b);
+// Apply the dot correction command to 'lights' shiftbrites. It is latched
+// automatically at the end. Use shiftbrite_set_dot_correction to set the
+// actual correction values that are used here.
+void shiftbrite_dot_correct(int lights);
 
 // Delay the necessary amount as laid out in the manual before latching a
 // command given 'lights' ShiftBrites in a chain, and then latch.

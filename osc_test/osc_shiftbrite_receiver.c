@@ -65,6 +65,6 @@ void shiftbrite_osc_blob_callback(int argNum, char * value, int length) {
         UARTprintf("[WARNING] Image too short by %d bytes.\n", maxLength - length + 1);
     }
     memcpy(shiftbrite_image, value, length);
-    shiftbrite_dot_correct(shiftbrite_x*shiftbrite_y, 65, 50, 50);
+    shiftbrite_dot_correct(shiftbrite_x*shiftbrite_y);
     shiftbrite_push_image(shiftbrite_image, shiftbrite_x, shiftbrite_y);
 }

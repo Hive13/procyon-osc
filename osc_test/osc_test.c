@@ -552,6 +552,7 @@ main(void)
     long lPeriodicTimer, lARPTimer;
     unsigned long ulUser0, ulUser1;
     unsigned long ulTemp;
+    int loopCount = 0;
 
     //
     // Set the clocking to run directly from the crystal.
@@ -624,7 +625,7 @@ main(void)
                 // partially remedies, as it seems that the corruption is
                 // identical to those cases where the color correction
                 // registers have never been sent in the first place.)
-                shiftbrite_dot_correct(lights, 65, 50, 50);
+                shiftbrite_dot_correct(lights);
                 /*for(j = 0; j < lights; ++j) {
                     shiftbrite_command(1, 65, 50, 50);
                     //shiftbrite_command(1, 10, 10, 10);
@@ -817,8 +818,9 @@ main(void)
         g_osc_state.intCallback = &intEcho;
         //g_osc_state.intCallback = &shiftbrite_osc_int_callback;
         g_osc_state.floatCallback = &floatEcho;
-        g_osc_state.stringCallback = &stringEcho;
-        //g_osc_state.stringCallback = &shiftbrite_osc_string_callback;
+        //g_osc_state.stringCallback = &stringEcho;
+        // This is here since oscP5 does not like to send binary blobs:
+        g_osc_state.stringCallback = &shiftbrite_osc_blob_callback;
         //g_osc_state.blobCallback = &blobEcho;
         g_osc_state.blobCallback = &shiftbrite_osc_blob_callback;
     }
@@ -841,6 +843,7 @@ main(void)
     //
     lPeriodicTimer = 0;
     lARPTimer = 0;
+    loopCount = 0;
     while(true)
     {
         //
@@ -965,6 +968,9 @@ main(void)
 #endif
             // If not doing anything else, refresh the display.
             shiftbrite_refresh();
+            UARTprintf("Refresh (t=%d)\n", loopCount);
+
+            loopCount++;
         }
 
         //

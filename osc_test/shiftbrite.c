@@ -26,6 +26,10 @@
 // properly.
 extern int delay_usec;
 static unsigned char shiftbrite_image[3*SHIFTBRITE_MAX_X*SHIFTBRITE_MAX_Y];
+// Dot correction values
+static int correct_r = 65;
+static int correct_g = 50;
+static int correct_b = 50;
 
 void shiftbrite_command(int cmd, int red, int green, int blue) {
     // Make sure we are latched low initially
@@ -39,6 +43,12 @@ void shiftbrite_command(int cmd, int red, int green, int blue) {
     while(ROM_SSIBusy(SSI0_BASE));
     ROM_SSIDataPut(SSI0_BASE, green);
     while(ROM_SSIBusy(SSI0_BASE));
+}
+
+void shiftbrite_set_dot_correction(int r, int g, int b) {
+    correct_r = r;
+    correct_g = g;
+    correct_b = b;
 }
 
 void shiftbrite_delay_latch(int lights) {
@@ -76,6 +86,7 @@ void shiftbrite_push_image(unsigned char * img, unsigned int x, unsigned int y) 
 }
 
 void shiftbrite_refresh() {
+    shiftbrite_dot_correct(SHIFTBRITE_MAX_X*SHIFTBRITE_MAX_Y);
     shiftbrite_push_image(shiftbrite_image, SHIFTBRITE_MAX_X, SHIFTBRITE_MAX_Y);
 }
 
@@ -89,10 +100,10 @@ unsigned char * shiftbrite_get_image(int * x_out, int * y_out) {
     return shiftbrite_image;
 }
 
-void shiftbrite_dot_correct(int lights, int r, int g, int b) {
+void shiftbrite_dot_correct(int lights) {
     int j;
     for(j = 0; j < lights; ++j) {
-        shiftbrite_command(1, 65, 50, 50);
+        shiftbrite_command(1, correct_r, correct_g, correct_b);
     }
     shiftbrite_delay_latch(lights);
 }

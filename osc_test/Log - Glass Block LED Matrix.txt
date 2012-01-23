@@ -153,3 +153,8 @@ fine (to the point of receiving packets at least), but I still cannot send
 for some reason.
 
 It now appears to be working. The issue is still not yet understood.
+
+oscP5 now appears to refuse to send out any packets if I attach any sort of
+binary blob to them. This is fucking stupid. Strings are fine, other message
+types are fine.
+
