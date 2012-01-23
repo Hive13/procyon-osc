@@ -158,3 +158,10 @@ oscP5 now appears to refuse to send out any packets if I attach any sort of
 binary blob to them. This is fucking stupid. Strings are fine, other message
 types are fine.
 
+Some of the glitching persists, even when I refresh the display regularly
+(including the dot correction registers). I have noticed that little electrical
+disturbances, such as turning off the lights in the bathroom where it resides,
+can mess up the whole display. However, when this happens, it seems to correct
+the display one LED at a time, with each refresh fixing one LED further in the
+chain until the whole display is correct again.
+
