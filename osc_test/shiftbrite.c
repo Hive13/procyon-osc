@@ -72,15 +72,16 @@ void shiftbrite_push_image(unsigned char * img, unsigned int x, unsigned int y) 
     // These three parameters determine mirroring and rotation:
     int rowDir = -1;
     int colDir = -1;
-    bool rotate90 = FALSE;
+    int rotate90 = false;
 
     col = colDir > 0 ? 0 : x-1;
     row = rowDir > 0 ? 0 : y-1;
     while(col >= 0 && col < x) {
+        unsigned char * offset = img;
         if (rotate90) {
-            unsigned char * offset = img + 3*(y*col + row);
+            offset += 3*(y*col + row);
         } else {
-            unsigned char * offset = img + 3*(x*row + col);
+            offset += 3*(x*row + col);
         }
         shiftbrite_command(0, offset[0], offset[1], offset[2]);
         row += rowDir;
