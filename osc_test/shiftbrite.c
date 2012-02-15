@@ -66,21 +66,33 @@ void shiftbrite_latch(void) {
 }
 
 void shiftbrite_push_image(unsigned char * img, unsigned int x, unsigned int y) {
-    int row, col;
-    
-    for(col = x - 1; col >= 0; --col) {
-        if (col % 2) {
-            for(row = y - 1; row >= 0; --row) {
-                unsigned char * offset = img + 3*(x*col + row);
-                shiftbrite_command(0, offset[0], offset[1], offset[2]);
-            }
+    int col, row;
+    // Just for clarity: col ranges from 0 to x-1, row ranges from 0 to y-1. 
+
+    // These three parameters determine mirroring and rotation:
+    int rowDir = -1;
+    int colDir = -1;
+    bool rotate90 = FALSE;
+
+    col = colDir > 0 ? 0 : x-1;
+    row = rowDir > 0 ? 0 : y-1;
+    while(col >= 0 && col < x) {
+        if (rotate90) {
+            unsigned char * offset = img + 3*(y*col + row);
         } else {
-             for(row = 0; row < y; ++row) {
-                unsigned char * offset = img + 3*(x*col + row);
-                shiftbrite_command(0, offset[0], offset[1], offset[2]);
-            }
+            unsigned char * offset = img + 3*(x*row + col);
+        }
+        shiftbrite_command(0, offset[0], offset[1], offset[2]);
+        row += rowDir;
+        // If we're at the end of a column, change direction (for we are
+        // using a zigzag pattern) and move to the next column.
+        if (row >= y || row < 0) {
+            rowDir = -rowDir;
+            col += colDir;
+            row += rowDir;
         }
     }
+    
     shiftbrite_delay_latch(x*y);
     shiftbrite_latch();
 }

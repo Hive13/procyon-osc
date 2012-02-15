@@ -1,5 +1,6 @@
 #include "osc_shiftbrite_receiver.h"
 #include "shiftbrite.h"
+#include "osc.h"
 #include "utils/uartstdio.h"
 #include "uip-conf.h"
 #include "string.h"
@@ -58,12 +59,15 @@ void shiftbrite_osc_int_callback(int argNum, int value) {
 
 void shiftbrite_osc_blob_callback(int argNum, char * value, int length) {
     int maxLength = shiftbrite_x * shiftbrite_y * 3;
-    if (length >= maxLength) {
+    UARTprintf("Dump of blob/string:\n");
+    // Hex dump
+    printHexDump(value, length);        
+    if (length > maxLength) {
         UARTprintf("[WARNING] Discarding %d extra bytes at end of image.\n", length - maxLength + 1);
-        length = maxLength;
     } else if (length <= maxLength) {
         UARTprintf("[WARNING] Image too short by %d bytes.\n", maxLength - length + 1);
     }
+    length = maxLength;
     memcpy(shiftbrite_image, value, length);
     shiftbrite_dot_correct(shiftbrite_x*shiftbrite_y);
     shiftbrite_push_image(shiftbrite_image, shiftbrite_x, shiftbrite_y);

@@ -818,11 +818,10 @@ main(void)
         g_osc_state.intCallback = &intEcho;
         //g_osc_state.intCallback = &shiftbrite_osc_int_callback;
         g_osc_state.floatCallback = &floatEcho;
-        //g_osc_state.stringCallback = &stringEcho;
-        // This is here since oscP5 does not like to send binary blobs:
-        g_osc_state.stringCallback = &shiftbrite_osc_blob_callback;
-        //g_osc_state.blobCallback = &blobEcho;
-        g_osc_state.blobCallback = &shiftbrite_osc_blob_callback;
+        g_osc_state.stringCallback = &stringEcho;
+        //g_osc_state.stringCallback = &shiftbrite_osc_blob_callback;
+        g_osc_state.blobCallback = &blobEcho;
+        //g_osc_state.blobCallback = &shiftbrite_osc_blob_callback;
     }
 
     // Set up OSC listener (hopefully)
@@ -966,9 +965,23 @@ main(void)
                 }
             }
 #endif
+
+            {
+                int x,y;
+                unsigned char * img = shiftbrite_get_image(&x, &y);
+                int pos = loopCount % (x*y*3);
+                int i = 0;
+                for(i = 0; i < x*y*3; ++i) {
+                    img[i] = 0;
+                }
+                img[pos] = (unsigned char) 255;
+                shiftbrite_refresh();
+            }
             // If not doing anything else, refresh the display.
+#if 0
             shiftbrite_refresh();
             UARTprintf("Refresh (t=%d)\n", loopCount);
+#endif
 
             loopCount++;
         }
