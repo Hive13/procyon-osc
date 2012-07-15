@@ -1,0 +1,2 @@
+serviceClass: org.hive13.client.OscService
+path: 424FE5AE745063DB95DB340591067AD0.gwt.rpc

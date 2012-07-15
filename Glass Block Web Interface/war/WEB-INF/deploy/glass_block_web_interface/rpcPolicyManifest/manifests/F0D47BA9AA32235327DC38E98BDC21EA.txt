@@ -1,0 +1,2 @@
+serviceClass: org.hive13.client.GreetingService
+path: C3A54F12229A3300AD25F78CD0DCBAC5.gwt.rpc

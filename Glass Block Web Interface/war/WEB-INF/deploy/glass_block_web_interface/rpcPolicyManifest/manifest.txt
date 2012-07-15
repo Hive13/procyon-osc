@@ -1,0 +1,2 @@
+# Module glass_block_web_interface
+# RPC service class, partial path of RPC policy file
