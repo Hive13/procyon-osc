@@ -28,29 +28,32 @@ public class OscServiceImpl extends RemoteServiceServlet implements OscService {
 	
 	public OscServiceImpl() throws UnknownHostException, SocketException {
 		super();
+		try {
 		
-		info.setDimensions(7, 8);
-		info.setHost("192.168.1.148");
-		//info.setHost("192.168.20.102");
-		info.setPort(12000);
-		info.setName("Procyon board");
-
-		socket = new DatagramSocket(listenPort);
-		remote = InetAddress.getByName(info.getHost());
-		// Start out with empty image
-		RGBColor[][] image = info.getImage();
-		for (int y = 0; y < info.getHeight(); ++y) {
-			for (int x = 0; x < info.getWidth(); ++x) {
-				image[x][y] = new RGBColor();
-				image[x][y].r = 0;
-				image[x][y].g = 0;
-				image[x][y].b = 0;
+			info.setDimensions(7, 8);
+			info.setHost("192.168.1.148");
+			//info.setHost("192.168.20.102");
+			info.setPort(12000);
+			info.setName("Procyon board");
+	
+			socket = new DatagramSocket(listenPort);
+			remote = InetAddress.getByName(info.getHost());
+			// Start out with empty image
+			RGBColor[][] image = info.getImage();
+			for (int y = 0; y < info.getHeight(); ++y) {
+				for (int x = 0; x < info.getWidth(); ++x) {
+					image[x][y] = new RGBColor();
+					image[x][y].r = 0;
+					image[x][y].g = 0;
+					image[x][y].b = 0;
+				}
 			}
+			updateImage();
+			
+			System.out.println("INIT: " + info.getHost() + ":" + info.getPort());
+		} catch (Throwable t) {
+			System.out.println(t.getMessage());
 		}
-		updateImage();
-		
-		System.out.println("INIT: " + info.getHost() + ":" + info.getPort());
-		
 	}
 
 	// Return information about the display - primarily, its size and where
