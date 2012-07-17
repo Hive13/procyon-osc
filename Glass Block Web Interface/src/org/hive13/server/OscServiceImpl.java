@@ -8,6 +8,9 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
 import org.hive13.client.OscService;
 
 import org.hive13.shared.DisplayInfo;
@@ -22,37 +25,57 @@ public class OscServiceImpl extends RemoteServiceServlet implements OscService {
 	
 	private DatagramSocket socket = null;
 	private InetAddress remote = null;
-	private int listenPort = 12001; // doesn't matter?
 	
 	private DisplayInfo info = new DisplayInfo();
 	
 	public OscServiceImpl() throws UnknownHostException, SocketException {
 		super();
 		try {
-		
-			info.setDimensions(7, 8);
-			info.setHost("192.168.1.148");
-			//info.setHost("192.168.20.102");
-			info.setPort(12000);
-			info.setName("Procyon board");
+			Context initCtx = new InitialContext();
+			Context envCtx = (Context) initCtx.lookup("java:comp/env");
+			String host = (String) envCtx.lookup("displayHost");
+			int port = Integer.parseInt((String) envCtx.lookup("displayPort"));
+			String name = (String) envCtx.lookup("displayName");
+			int listenPort = Integer.parseInt((String) envCtx.lookup("listenPort"));
+			
+			int width = Integer.parseInt((String) envCtx.lookup("displayWidth"));
+			int height = Integer.parseInt((String) envCtx.lookup("displayHeight"));
+			
+			if (host == null) {
+			    host = "192.168.1.148";
+			    port = 12000;
+			    name = "Default Procyon board";
+			    listenPort = 12001;
+			    width = 7;
+			    height = 8;
+			}
+			
+            System.out.println("INIT: " + info.getHost() + ":" + info.getPort());
+			
+			info.setDimensions(width, height);
+			info.setHost(host);
+			info.setPort(port);
+			info.setName(name);
+
+			System.out.println("Opening socket...");
 	
 			socket = new DatagramSocket(listenPort);
 			remote = InetAddress.getByName(info.getHost());
-			// Start out with empty image
+			// Start out with empty imagec
 			RGBColor[][] image = info.getImage();
 			for (int y = 0; y < info.getHeight(); ++y) {
 				for (int x = 0; x < info.getWidth(); ++x) {
-					image[x][y] = new RGBColor();
-					image[x][y].r = 0;
-					image[x][y].g = 0;
-					image[x][y].b = 0;
+					image[x][y] = new RGBColor(0,0,0);
 				}
 			}
-			updateImage();
 			
-			System.out.println("INIT: " + info.getHost() + ":" + info.getPort());
+            System.out.println("Initialized display...");
+
+			updateImage();
+            System.out.println("updateImage() called...");
+			
 		} catch (Throwable t) {
-			System.out.println(t.getMessage());
+			System.out.println("Exception thrown: " + t.getMessage());
 		}
 	}
 
@@ -76,12 +99,7 @@ public class OscServiceImpl extends RemoteServiceServlet implements OscService {
 	
 	public void setPixel(int x, int y, RGBColor c) {
 		System.out.println("TOGGLING: " + x + "," + y);
-		RGBColor[][] image = info.getImage();
-		
-		/*image[x][y].r = (byte) (255 - image[x][y].r);
-		image[x][y].g = (byte) (255 - image[x][y].g);
-		image[x][y].b = (byte) (255 - image[x][y].b);*/
-		image[x][y] = c;
+		info.getImage()[x][y] = c;
 
 		updateImage();
 	}

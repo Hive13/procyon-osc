@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import org.hive13.shared.DisplayInfo;
 import org.hive13.shared.RGBColor;
@@ -25,24 +26,28 @@ public class PixelGrid extends Grid {
 		super(info.getHeight(), info.getWidth());
 		this.info = info;
 		
+		Label infoLabel = new Label();
+		infoLabel.setText("Initializing...");
+		parent.add(infoLabel);
+		
         //DOM.setStyleAttribute(getElement(), "border", "1px dotted red");
         //DOM.setStyleAttribute(getElement(), "padding", "20px");
 		sinkEvents(Event.ONMOUSEDOWN | Event.ONMOUSEUP | Event.ONMOUSEOUT);
 		syncImage();
 		setSize("300px", "300px");
 		setCellSpacing(0);
-		
 		this.svc = svc;
 		
 		parent.add(this);
 		parent.add(makeResetButton());
+        parent.add(makeInvertButton());
+		parent.remove(infoLabel);
     }
 	
 	private Button makeResetButton() {
 		final Button resetButton = new Button();
 		resetButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				System.out.println("clicked!");
 				svc.resetImage(new AsyncCallback() {
 					public void onFailure(Throwable caught) {
 						//infoLabel.setText("Error communicating with server! " + caught.getMessage());
@@ -58,6 +63,34 @@ public class PixelGrid extends Grid {
 		resetButton.setText("Clear");
 		return resetButton;
 	}
+
+   private Button makeInvertButton() {
+        final Button resetButton = new Button();
+        resetButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                svc.resetImage(new AsyncCallback() {
+                    public void onFailure(Throwable caught) {
+                        //infoLabel.setText("Error communicating with server! " + caught.getMessage());
+                        System.out.println(caught.getMessage());
+                    }
+
+                    public void onSuccess(Object o) {
+                        RGBColor[][] image = info.getImage();
+                        for(int n = 0; n < info.getHeight(); ++n) {
+                            for(int m = 0; m < info.getWidth(); ++m) {
+                                image[m][n].r = 255 - image[m][n].r;
+                                image[m][n].g = 255 - image[m][n].g;
+                                image[m][n].b = 255 - image[m][n].b;
+                            }
+                        }
+                        syncImage();
+                    }
+                });
+            }
+        });
+        resetButton.setText("Invert");
+        return resetButton;
+    }
 	
 	public void resetImage() {
 		RGBColor[][] image = info.getImage();
@@ -96,6 +129,7 @@ public class PixelGrid extends Grid {
         System.out.println("Event at " + row + "," + column);
         switch (DOM.eventGetType(event))
         {
+        case Event.ONMOUSEWHEEL:
         case Event.ONMOUSEDOWN:
             /*
              * Get the mouse wheel information

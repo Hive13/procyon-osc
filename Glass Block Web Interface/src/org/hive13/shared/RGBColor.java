@@ -5,6 +5,16 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class RGBColor implements IsSerializable {
 	// Just treat these like unsigned bytes.
 	public int r, g, b;
+
+	public RGBColor() {
+		r = g = b = 0;
+	}
+	
+	public RGBColor(int r, int g, int b) {
+		this.r = r;
+		this.g = g;
+		this.b = b;
+	}
 	
 	public String getString() {
 		int rgb = r & 0xFF;

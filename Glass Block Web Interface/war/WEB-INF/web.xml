@@ -20,5 +20,42 @@
   <welcome-file-list>
     <welcome-file>Glass_Block_Web_Interface.html</welcome-file>
   </welcome-file-list>
+  <!-- Environment variables -->
+  
+  <!-- These two properties are the IP address and the port of the board
+       running the display and listening over OSC -->
+  <env-entry>
+  	<env-entry-name>displayHost</env-entry-name>
+  	<env-entry-type>java.lang.String</env-entry-type>
+  	<env-entry-value>192.168.1.148</env-entry-value>
+  </env-entry>
+  <env-entry>
+  	<env-entry-name>displayPort</env-entry-name>
+  	<env-entry-type>java.lang.String</env-entry-type>
+  	<env-entry-value>12000</env-entry-value>
+  </env-entry>
+  <!-- Next two are the width and height in pixels -->
+  <env-entry>
+  	<env-entry-name>displayWidth</env-entry-name>
+  	<env-entry-type>java.lang.String</env-entry-type>
+  	<env-entry-value>7</env-entry-value>
+  </env-entry>
+  <env-entry>
+  	<env-entry-name>displayHeight</env-entry-name>
+  	<env-entry-type>java.lang.String</env-entry-type>
+  	<env-entry-value>8</env-entry-value>
+  </env-entry>
+  <!-- The name of the display (mostly for display purposes) -->
+  <env-entry>
+  	<env-entry-name>displayName</env-entry-name>
+  	<env-entry-type>java.lang.String</env-entry-type>
+  	<env-entry-value>Procyon</env-entry-value>
+  </env-entry>
+  <!-- What port we listen on. This is basically arbitrary, since we don't listen... -->
+  <env-entry>
+  	<env-entry-name>listenPort</env-entry-name>
+  	<env-entry-type>java.lang.String</env-entry-type>
+  	<env-entry-value>12001</env-entry-value>
+  </env-entry>
 
 </web-app>

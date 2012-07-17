@@ -39,4 +39,5 @@ public class Glass_Block_Web_Interface implements EntryPoint {
 		});
 
 	}
+	
 }
